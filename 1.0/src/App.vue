@@ -1,5 +1,8 @@
 <template>
   <div class="padre">
+    <div>
+      <p class="alerta">{{ alerta }}</p>
+    </div>
     <div class="cajas" v-show="data_user">
       <p class="titulo">Cuenta Bancaria</p>
       <input class="caja" type="number" id="pre" placeholder="Ingresar saldo inicial" v-model="valor" />
@@ -10,7 +13,7 @@
     <div class="sistema" v-show="data_contened">
       <div class="informacion">
         <p class="textousuario">Usuario actual {{ user }}</p>
-        <p class="textosaldo">Tu saldo es ${{ valor }}</p>
+        <p class="textosaldo">Tu saldo es {{ puntuacion(valor) }}</p>
         <form @submit.prevent="realizarOperacion">
           <select class="registro" v-model="operacion">
             <option value="consignar">Consignar</option>
@@ -25,7 +28,7 @@
         <table>
           <tbody>
             <tr v-for="(cantidad, denominacion) in desgloseBilletes" :key="denominacion">
-              <td>Entregado {{ cantidad }} billete(s) de {{ denominacion }}</td>
+              <td>Entregado {{ cantidad }} billete(s) de {{ puntuacion(denominacion) }}</td>
             </tr>
           </tbody>
         </table>
@@ -36,6 +39,11 @@
 
 <script setup>
 import { ref } from "vue";
+let alerta = ref("");
+function ocultaralerta() { setTimeout(() => { alerta.value = "" }, 5000) }
+const puntuacion = (number) => {
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP" }).format(number);
+};
 let data_user = ref(true);
 let data_contened = ref(false);
 let data_retiros = ref(false);
@@ -52,13 +60,17 @@ function cambiardivs() {
 }
 const validar = () => {
   if (user.value === "") {
-    alert("Nombre de usuario no puede estar vacio")
+    alerta.value = "Nombre de usuario no puede estar vacio"
+    ocultaralerta()
   } else if (valor.value === "") {
-    alert("Debe ingresar un valor")
+    alerta.value = "Debe ingresar un valor"
+    ocultaralerta()
   } else if (contra.value === "") {
-    alert("Ingrese una contraseña")
+    alerta.value = "Ingrese una contraseña"
+    ocultaralerta()
   } else {
-    alert("Registro de usuario exitoso")
+    alerta.value = "Registro de usuario exitoso"
+    ocultaralerta()
     users.value.push({
       nombre: user.value,
       contrasena: contra.value,
@@ -77,10 +89,12 @@ const realizarOperacion = () => {
 };
 const consignar = () => {
   if (isNaN(Number(plus.value)) || Number(plus.value) <= 0) {
-    alert("Ingrese un valor válido para la consignación");
+    alerta.value = "Ingrese un valor válido para la consignación";
+    ocultaralerta()
   } else {
     valor.value = Number(valor.value) + Number(plus.value);
-    alert(`Consignación exitosa. Nuevo saldo: $${valor.value}`);
+    alerta.value = `Consignación exitosa. Nuevo saldo: ${puntuacion(valor.value)}`;
+    ocultaralerta()
   }
 };
 const pedirContrasena = () => {
@@ -88,19 +102,24 @@ const pedirContrasena = () => {
   if (inputPassword === users.value.find(u => u.nombre === user.value)?.contrasena) {
     retirar();
   } else {
-    alert("Contraseña incorrecta. No se puede realizar el retiro");
+    alerta.value= "Contraseña incorrecta. No se puede realizar el retiro";
+    ocultaralerta()
   }
 };
 const retirar = () => {
   if (isNaN(Number(plus.value)) || Number(plus.value) <= 0) {
-    alert("Ingrese un valor válido para el retiro");
+    alerta.value = "Ingrese un valor válido para el retiro";
+    ocultaralerta()
   } else if (Number(plus.value) % 10000 !== 0) {
-    alert("Solo se permiten retiros en múltiplos de 10000");
+    alerta.value = "Solo se permiten retiros en múltiplos de 10.000";
+    ocultaralerta()
   } else if (Number(plus.value) > Number(valor.value)) {
-    alert("No tiene suficiente saldo para realizar el retiro");
+    alerta.value = "No tiene suficiente saldo para realizar el retiro";
+    ocultaralerta()
   } else {
     valor.value = Number(valor.value) - Number(plus.value);
-    alert(`Retiro exitoso. Nuevo saldo: $${valor.value}`);
+    alerta.value = `Retiro exitoso. Nuevo saldo: ${puntuacion(valor.value)}`;
+    ocultaralerta()
     actualizarDesgloseBilletes(Number(plus.value));
   }
 };
@@ -138,6 +157,7 @@ const actualizarDesgloseBilletes = (monto) => {
   align-items: center;
   justify-content: center;
   margin-top: 100px;
+
 }
 
 .titulo {
@@ -150,6 +170,7 @@ const actualizarDesgloseBilletes = (monto) => {
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #000;
+  width: 700px;
 }
 
 .button {
@@ -200,6 +221,7 @@ const actualizarDesgloseBilletes = (monto) => {
   align-items: center;
   justify-content: center;
   margin-top: 20px;
+  width: 100%;
 }
 
 .textoretiro {
@@ -220,4 +242,11 @@ td {
 
 tr {
   background-color: #f2f2f2;
-}</style>
+}
+
+.alerta {
+  font-size: 30px;
+  text-align: center;
+  margin-top: 20px;
+}
+</style>
