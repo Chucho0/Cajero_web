@@ -3,6 +3,10 @@
     <div>
       <p class="alerta">{{ alerta }}</p>
     </div>
+    <div v-if="ingresarcontrasena">
+      <input class="caja" type="text" placeholder="Ingrese contrasena" v-model="contrasena">
+      <button class="button" @click="confirmarcontrasena()">Confirmar</button>
+    </div>
     <div class="cajas" v-show="data_user">
       <p class="titulo">Cuenta Bancaria</p>
       <input class="caja" type="number" id="pre" placeholder="Ingresar saldo inicial" v-model="valor" />
@@ -54,6 +58,8 @@ const contra = ref("");
 const plus = ref("");
 const operacion = ref("");
 const desgloseBilletes = ref({ 50000: 0, 20000: 0, 10000: 0 });
+let ingresarcontrasena = ref(false);
+let contrasena = ref("");
 function cambiardivs() {
   data_user.value = false
   data_contened.value = true
@@ -98,14 +104,25 @@ const consignar = () => {
   }
 };
 const pedirContrasena = () => {
-  const inputPassword = prompt("Ingrese su contraseña para retirar");
-  if (inputPassword === users.value.find(u => u.nombre === user.value)?.contrasena) {
-    retirar();
-  } else {
-    alerta.value= "Contraseña incorrecta. No se puede realizar el retiro";
+  ingresarcontrasena.value = true;
+  if (contrasena.value ==="") {
+    alerta.value = "Ingrese su contraseña para realizar el retiro";
     ocultaralerta()
   }
 };
+const confirmarcontrasena = () => {
+  let usuario = users.value.find((usuario) => usuario.nombre === user.value);
+  if (usuario.contrasena === contrasena.value) {
+    ingresarcontrasena.value = false;
+    contrasena.value = "";
+    retirar();
+  } else {
+    alerta.value = "Contraseña incorrecta";
+    ingresarcontrasena.value = false;
+    contrasena.value = "";
+    ocultaralerta()
+  }
+}
 const retirar = () => {
   if (isNaN(Number(plus.value)) || Number(plus.value) <= 0) {
     alerta.value = "Ingrese un valor válido para el retiro";
@@ -157,14 +174,11 @@ const actualizarDesgloseBilletes = (monto) => {
   align-items: center;
   justify-content: center;
   margin-top: 100px;
-
 }
-
 .titulo {
   font-size: 30px;
   margin-bottom: 20px;
 }
-
 .caja {
   margin-bottom: 20px;
   padding: 10px;
@@ -172,7 +186,6 @@ const actualizarDesgloseBilletes = (monto) => {
   border: 1px solid #000;
   width: 700px;
 }
-
 .button {
   padding: 10px;
   border-radius: 5px;
@@ -181,7 +194,6 @@ const actualizarDesgloseBilletes = (monto) => {
   color: #fff;
   cursor: pointer;
 }
-
 .sistema {
   display: flex;
   flex-direction: column;
@@ -189,7 +201,6 @@ const actualizarDesgloseBilletes = (monto) => {
   justify-content: center;
   margin-top: 100px;
 }
-
 .informacion {
   display: flex;
   flex-direction: column;
@@ -197,24 +208,20 @@ const actualizarDesgloseBilletes = (monto) => {
   justify-content: center;
   margin-bottom: 20px;
 }
-
 .textosaldo {
   font-size: 30px;
   margin-bottom: 20px;
 }
-
 .textousuario {
   font-size: 30px;
   margin-bottom: 20px;
 }
-
 .registro {
   margin-bottom: 20px;
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #000;
 }
-
 .retiros {
   display: flex;
   flex-direction: column;
@@ -223,27 +230,22 @@ const actualizarDesgloseBilletes = (monto) => {
   margin-top: 20px;
   width: 100%;
 }
-
 .textoretiro {
   font-size: 30px;
   margin-bottom: 20px;
 }
-
 table {
   border: 1px solid #000;
   border-collapse: collapse;
   width: 100%;
 }
-
 td {
   border: 1px solid #000;
   padding: 10px;
 }
-
 tr {
   background-color: #f2f2f2;
 }
-
 .alerta {
   font-size: 30px;
   text-align: center;
